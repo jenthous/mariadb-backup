@@ -4,7 +4,7 @@ metadata:
   name: mariadb-backup-job
 spec:
   # 매일 새벽 3시에 실행 (cron 표현식)
-  schedule: "0 3 * * *"
+  schedule: "0 */3 * * *"
   # 또는 3시간마다 실행하려면: "0 */3 * * *"
   jobTemplate:
     spec:
@@ -33,13 +33,21 @@ spec:
               value: "${MARIADB_DATABASE}"
             - name: BACKUP_DIR
               value: "/backup"
+            - name: LOCAL_BACKUP_DIR
+              value: "/local-backup"
             - name: BACKUP_FILENAME_PREFIX
               value: "mariadb_backup"
             volumeMounts:
             - name: backup-volume
               mountPath: /backup
+            - name: local-backup-volume
+              mountPath: /local-backup
           volumes:
           - name: backup-volume
             persistentVolumeClaim:
               claimName: backup-pvc
+          - name: local-backup-volume
+            hostPath:
+              path: ${LOCAL_BACKUP_PATH}
+              type: DirectoryOrCreate
           restartPolicy: OnFailure 

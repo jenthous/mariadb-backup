@@ -20,6 +20,13 @@ if [ ! -d "$BACKUP_DIR" ]; then
     exit 1
 fi
 
+# 로컬 백업 디렉토리 확인
+if [ -n "$LOCAL_BACKUP_DIR" ] && [ ! -d "$LOCAL_BACKUP_DIR" ]; then
+    echo "로컬 백업 디렉토리가 존재하지 않습니다: $LOCAL_BACKUP_DIR"
+    echo "볼륨이 제대로 마운트되었는지 확인하거나 디렉토리를 생성합니다."
+    mkdir -p "$LOCAL_BACKUP_DIR"
+fi
+
 # 현재 시간을 파일명에 포함
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 BACKUP_FILE="${BACKUP_DIR}/${BACKUP_FILENAME_PREFIX}_${MYSQL_DATABASE}_${TIMESTAMP}.sql"
@@ -57,6 +64,19 @@ if [ $DUMP_RESULT -eq 0 ]; then
     echo "데이터베이스 덤프가 성공적으로 완료되었습니다."
     echo "백업 파일: $BACKUP_FILE"
     echo "파일 크기: $(du -h "$BACKUP_FILE" | cut -f1)"
+    
+    # 로컬 백업 디렉토리에 복사
+    if [ -n "$LOCAL_BACKUP_DIR" ] && [ -d "$LOCAL_BACKUP_DIR" ]; then
+        LOCAL_BACKUP_FILE="${LOCAL_BACKUP_DIR}/${BACKUP_FILENAME_PREFIX}_${MYSQL_DATABASE}_${TIMESTAMP}.sql"
+        echo "로컬 백업 디렉토리에 백업 파일을 복사합니다..."
+        cp "$BACKUP_FILE" "$LOCAL_BACKUP_FILE"
+        if [ $? -eq 0 ]; then
+            echo "로컬 백업이 성공적으로 완료되었습니다."
+            echo "로컬 백업 파일: $LOCAL_BACKUP_FILE"
+        else
+            echo "로컬 백업 복사 중 오류가 발생했습니다."
+        fi
+    fi
 else
     echo "데이터베이스 덤프 중 오류가 발생했습니다."
     exit 1
@@ -88,6 +108,19 @@ if [ "$MYSQL_DATABASE" = "all" ]; then
         echo "모든 데이터베이스 덤프가 성공적으로 완료되었습니다."
         echo "백업 파일: $BACKUP_FILE"
         echo "파일 크기: $(du -h "$BACKUP_FILE" | cut -f1)"
+        
+        # 로컬 백업 디렉토리에 복사
+        if [ -n "$LOCAL_BACKUP_DIR" ] && [ -d "$LOCAL_BACKUP_DIR" ]; then
+            LOCAL_BACKUP_FILE="${LOCAL_BACKUP_DIR}/${BACKUP_FILENAME_PREFIX}_all_databases_${TIMESTAMP}.sql"
+            echo "로컬 백업 디렉토리에 백업 파일을 복사합니다..."
+            cp "$BACKUP_FILE" "$LOCAL_BACKUP_FILE"
+            if [ $? -eq 0 ]; then
+                echo "로컬 백업이 성공적으로 완료되었습니다."
+                echo "로컬 백업 파일: $LOCAL_BACKUP_FILE"
+            else
+                echo "로컬 백업 복사 중 오류가 발생했습니다."
+            fi
+        fi
     else
         echo "모든 데이터베이스 덤프 중 오류가 발생했습니다."
         exit 1

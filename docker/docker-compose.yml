@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  mariadb-backup:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - MYSQL_HOST=${MYSQL_HOST:-localhost}
+      - MYSQL_PORT=${MYSQL_PORT:-3306}
+      - MYSQL_USER=${MYSQL_USER:-root}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-password}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-mydatabase}
+      - BACKUP_DIR=/backup
+      - BACKUP_FILENAME_PREFIX=${BACKUP_FILENAME_PREFIX:-mariadb_backup}
+    volumes:
+      - ${BACKUP_PATH:-./backups}:/backup
+    # 컨테이너를 시작하면 백업을 수행하고 종료합니다
+    restart: "no" 

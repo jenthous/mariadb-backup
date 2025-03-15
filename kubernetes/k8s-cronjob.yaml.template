@@ -6,6 +6,14 @@ spec:
   # 매일 새벽 3시에 실행 (cron 표현식)
   schedule: "0 */3 * * *"
   # 또는 3시간마다 실행하려면: "0 */3 * * *"
+  
+  # 중복 실행 방지 설정
+  concurrencyPolicy: Forbid
+  
+  # 작업 히스토리 제한 설정
+  successfulJobsHistoryLimit: 5
+  failedJobsHistoryLimit: 5
+  
   jobTemplate:
     spec:
       template:

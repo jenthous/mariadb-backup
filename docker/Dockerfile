@@ -1,10 +1,13 @@
-FROM mariadb:latest
+FROM debian:bullseye-slim
 
 # 필요한 패키지 설치
 RUN apt-get update && apt-get install -y \
-    cron \
     mariadb-client \
+    ca-certificates \
     && rm -rf /var/lib/apt/lists/*
+
+# 패키지가 설치되었는지 확인
+RUN which mysqldump || (echo "mysqldump not found" && exit 1)
 
 # 작업 디렉토리 생성
 WORKDIR /app
